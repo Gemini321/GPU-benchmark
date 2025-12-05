@@ -133,8 +133,8 @@ struct GemmCaller<hcHalf_t> {
     static constexpr const char *label = "FP16";
     static void gemm(hcblasHandle_t handle, int m, int n, int k, const float *alpha, const hcHalf_t *A, int lda,
                      const hcHalf_t *B, int ldb, const float *beta, hcHalf_t *C, int ldc) {
-        HCBLAS_CHECK(hcblasGemmEx(handle, HCBLAS_OP_N, HCBLAS_OP_N, m, n, k, alpha, A, HC_R_16F, lda, B, HC_R_16F,
-                                  ldb, beta, C, HC_R_16F, ldc, HCBLAS_COMPUTE_32F, HCBLAS_GEMM_DEFAULT));
+        HCBLAS_CHECK(hcblasGemmEx(handle, HCBLAS_OP_N, HCBLAS_OP_N, m, n, k, alpha, A, HPCC_R_16F, lda, B, HPCC_R_16F,
+                                  ldb, beta, C, HPCC_R_16F, ldc, HCBLAS_COMPUTE_32F, HCBLAS_GEMM_DEFAULT));
     }
 };
 

@@ -33,9 +33,9 @@ typedef cublasComputeType_t hcblasComputeType_t;
 #define HCBLAS_COMPUTE_32F CUBLAS_COMPUTE_32F
 #define HCBLAS_GEMM_DEFAULT CUBLAS_GEMM_DEFAULT
 
-#define HC_R_16F CUDA_R_16F
-#define HC_R_32F CUDA_R_32F
-#define HC_R_64F CUDA_R_64F
+#define HPCC_R_16F CUDA_R_16F
+#define HPCC_R_32F CUDA_R_32F
+#define HPCC_R_64F CUDA_R_64F
 
 #define hcGetErrorString cudaGetErrorString
 #define hcMalloc cudaMalloc
