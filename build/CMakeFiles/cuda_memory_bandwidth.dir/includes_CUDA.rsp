@@ -1,0 +1,1 @@
+-I"/root/GPU-benchmark/include" -isystem "/root/spack/opt/spack/linux-skylake_avx512/cuda-12.9.0-gbyvw6ra5oooyu22ytcc7puunkdapata/targets/x86_64-linux/include"
