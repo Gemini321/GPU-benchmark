@@ -8,9 +8,10 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 OUT_DIR=${OUT_DIR:-"$ROOT_DIR/bin-hc"}
 mkdir -p "$OUT_DIR"
 
+HPCC_PATH=/opt/hpcc
 HTCXX=${HTCXX:-htcc}
-HT_INCLUDE_DIR=${HT_INCLUDE_DIR:-/opt/hc/include}
-HT_LIB_DIR=${HT_LIB_DIR:-/opt/hc/lib}
+HT_INCLUDE_DIR=${HT_INCLUDE_DIR:-$HPCC_PATH/include}
+HT_LIB_DIR=${HT_LIB_DIR:-$HPCC_PATH/lib:$HPCC_PATH/lib64}
 
 COMMON_FLAGS=(
   -std=c++14 -O3

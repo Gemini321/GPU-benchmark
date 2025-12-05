@@ -18,7 +18,9 @@ typedef cublasStatus_t hcblasStatus_t;
 typedef __half hcHalf_t;
 typedef cublasComputeType_t hcblasComputeType_t;
 
-#define HC_SUCCESS cudaSuccess
+#define hcSuccess cudaSuccess
+#define hcErrorInvalidValue cudaErrorInvalidValue
+#define hcInvalidDevice cudaErrorInvalidDevice
 #define hcblasCreate cublasCreate
 #define hcblasDestroy cublasDestroy
 #define hcblasSetStream cublasSetStream
@@ -59,5 +61,5 @@ typedef cublasComputeType_t hcblasComputeType_t;
 #define HCBLAS_STATUS_SUCCESS CUBLAS_STATUS_SUCCESS
 #else
 #include <hc_runtime_api.h>
-#include <hcblas.h>
+#include "hcblas/hcblas.h"
 #endif

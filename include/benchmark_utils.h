@@ -13,7 +13,7 @@
 #define HC_CHECK(cmd)                                                                       \
     do {                                                                                    \
         hcError_t _status = cmd;                                                            \
-        if (_status != HC_SUCCESS) {                                                        \
+        if (_status != hcSuccess) {                                                         \
             fprintf(stderr, "HC error %d at %s:%d -> %s\n", static_cast<int>(_status),      \
                     __FILE__, __LINE__, hcGetErrorString(_status));                         \
             throw std::runtime_error("hc runtime call failed");                             \
