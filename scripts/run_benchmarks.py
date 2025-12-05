@@ -148,12 +148,14 @@ def main():
         build()
 
     if args.platform in ("hc", "both"):
+        run_device_info("hc")
         run_fp64("hc")
         run_bandwidth("hc")
         run_gemm("hc")
         run_vector_add("hc")
         run_matrix_add("hc")
     if args.platform in ("cuda", "both"):
+        run_device_info("cuda")
         run_fp64("cuda")
         run_bandwidth("cuda")
         run_gemm("cuda")
@@ -163,3 +165,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+def run_device_info(platform: str):
+    binary = BIN_DIR / ("cuda_device_info" if platform == "cuda" else "device_info")
+    run_cmd([str(binary)])

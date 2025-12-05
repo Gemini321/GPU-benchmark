@@ -24,12 +24,14 @@ if [[ "$MODE" == "hc" ]]; then
   GEMM_BIN="$BIN_DIR/hcblas_gemm"
   VADD_BIN="$BIN_DIR/vector_add"
   MADD_BIN="$BIN_DIR/matrix_add"
+  INFO_BIN="$BIN_DIR/device_info"
 else
   FP64_BIN="$BIN_DIR/cuda_fp64_flops"
   BW_BIN="$BIN_DIR/cuda_memory_bandwidth"
   GEMM_BIN="$BIN_DIR/cublas_gemm"
   VADD_BIN="$BIN_DIR/cuda_vector_add"
   MADD_BIN="$BIN_DIR/cuda_matrix_add"
+  INFO_BIN="$BIN_DIR/cuda_device_info"
 fi
 
 BW_SIZES=(
@@ -47,6 +49,7 @@ BW_SIZES=(
 )
 
 set -x
+"$INFO_BIN"
 "$FP64_BIN" --blocks 512 --threads 256 --iterations 8192 --repeats 40
 BW_ARGS=(--iterations 50)
 for size in "${BW_SIZES[@]}"; do

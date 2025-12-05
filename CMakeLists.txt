@@ -73,6 +73,9 @@ if(BUILD_HC_BENCHES)
 
     add_executable(matrix_add src/matrix_add.cu)
     target_link_libraries(matrix_add PRIVATE benchmark_common ${_runtime_lib})
+
+    add_executable(device_info src/device_info.cu)
+    target_link_libraries(device_info PRIVATE benchmark_common ${_runtime_lib})
 endif()
 
 if(BUILD_NVIDIA_BENCHES)
@@ -95,4 +98,8 @@ if(BUILD_NVIDIA_BENCHES)
     add_executable(cuda_matrix_add src/cuda_matrix_add.cu)
     target_include_directories(cuda_matrix_add PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
     target_link_libraries(cuda_matrix_add PRIVATE CUDA::cudart CUDA::cublas)
+
+    add_executable(cuda_device_info src/cuda_device_info.cu)
+    target_include_directories(cuda_device_info PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_link_libraries(cuda_device_info PRIVATE CUDA::cudart)
 endif()

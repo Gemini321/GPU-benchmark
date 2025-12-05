@@ -8,6 +8,7 @@ Toolkit for evaluating MXGPU/hc devices with three micro-benchmarks: raw FP64 th
 - `src/memory_bandwidth.cu` – STREAM-style H2D/D2H/D2D bandwidth sweep that uses pinned host buffers and event timing.
 - `src/vector_add.cu` – configurable FP32/FP64 向量加法算子，支持多尺寸扫频，直接换算 GFLOP/s；`src/cuda_vector_add.cu` 是对应的 NVIDIA 版本（在驱动无法 JIT 自定义 kernel 时会自动回退到 cuBLAS `geam` 以继续给出结果）。
 - `src/matrix_add.cu` – FP32/FP64 矩阵加法（element-wise C=A+B），支持任意 `MxN` 组合；`src/cuda_matrix_add.cu` 为 CUDA 版本（同样在 PTX 不受支持时会回退到 cuBLAS `geam` 完成计算）。
+- `src/device_info.cu` / `src/cuda_device_info.cu` – 设备信息探测工具，输出 SM 数、L1/L2 cache、显存、时钟等关键硬件数据，便于在跑基准前验证测试 GPU。
 - `src/hcblas_gemm.cu` – multi-shape GEMM benchmark exercising FP64 (`hcblasDgemm`), FP32 (`hcblasSgemm`), FP16/TF32 (`hcblasGemmEx`)，兼容矩形/正方矩阵。
 - `include/benchmark_utils_cuda.h`, `src/cuda_*.cu`, `src/cublas_gemm.cu` – pure CUDA/cuBLAS equivalents for running the same tests on NVIDIA GPUs locally.
 - `scripts/run_benchmarks.py` – helper that configures CMake, builds the targets, and runs a curated sweep of FP64/bandwidth/GEMM cases.
@@ -62,11 +63,12 @@ cd /root/GPU-benchmark
 
 The script performs the following:
 
-1. **FP64 compute** – four kernel shapes covering 256–768 blocks × 256–512 threads with 4K–8K inner-loop iterations，覆盖更高占用率与指令混合。
-2. **Memory bandwidth** – H2D/D2H/D2D 传输覆盖 1MB 到 1GB 以 2 的幂递增的多个尺寸（1、2、4、8、16、32、64、128、256、512、1024 MB），并额外给出 float4 向量化 `copy_kernel`（读+写）计算出的 “RW Copy GB/s”（若驱动不支持 PTX，则自动退化为 2×D2D 结果并提示升级建议），更细致地观察 cache/TLB 与分页影响。
-3. **hcBLAS / cuBLAS GEMM** – 同时测试 FP64、FP32、FP16、TF32（FP16/TF32 走 GEMMEx/Compute32F+Tensor Core），覆盖 1024³ 到 16384³（及多个矩形尺寸）的多种矩阵形状，并重复 20 次以稳定计时。
-4. **Vector add (FP32/FP64)** – 1M～64M 元素的 `C=A+B`，以 80 次循环求平均，考察访存绑定的简单逐元素算子。
-5. **Matrix add (FP32/FP64)** – 2048²～8192² 及 4096×8192 的元素级加法，衡量更大 2D 布局的吞吐能力。
+1. **Device info** – 先调用 `device_info` / `cuda_device_info` 打印当前 GPU 的 SM 数、L1/L2、显存与时钟，确认测试目标是否正确。
+2. **FP64 compute** – four kernel shapes covering 256–768 blocks × 256–512 threads with 4K–8K inner-loop iterations，覆盖更高占用率与指令混合。
+3. **Memory bandwidth** – H2D/D2H/D2D 传输覆盖 1MB 到 1GB 以 2 的幂递增的多个尺寸（1、2、4、8、16、32、64、128、256、512、1024 MB），并额外给出 float4 向量化 `copy_kernel`（读+写）计算出的 “RW Copy GB/s”（若驱动不支持 PTX，则自动退化为 2×D2D 结果并提示升级建议），更细致地观察 cache/TLB 与分页影响。
+4. **hcBLAS / cuBLAS GEMM** – 同时测试 FP64、FP32、FP16、TF32（FP16/TF32 走 GEMMEx/Compute32F+Tensor Core），覆盖 1024³ 到 16384³（及多个矩形尺寸）的多种矩阵形状，并重复 20 次以稳定计时。
+5. **Vector add (FP32/FP64)** – 1M～64M 元素的 `C=A+B`，以 80 次循环求平均，考察访存绑定的简单逐元素算子。
+6. **Matrix add (FP32/FP64)** – 2048²～8192² 及 4096×8192 的元素级加法，衡量更大 2D 布局的吞吐能力。
 
 Each executable is also independently configurable:
 
@@ -84,6 +86,10 @@ build/bin/hcblas_gemm --dtype double --dtype float --dtype float16 --dtype tf32 
 # Vector add + Matrix add
 build/bin/vector_add --dtype double --dtype float --size 16777216 --size 67108864 --repeats 80
 build/bin/matrix_add --dtype double --dtype float --shape 4096x4096 --shape 8192x8192 --repeats 40
+
+# Device info
+build/bin/device_info              # hc / MXGPU
+build/bin/cuda_device_info --device 0   # NVIDIA
 ```
 
 The binaries print time-per-iteration and sustained throughput (GFLOP/s or GB/s). Combine these measurements with device telemetry (frequency, temperature, power) from mxGPU tools to understand stability and throttling limits.

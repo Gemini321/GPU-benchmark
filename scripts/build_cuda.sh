@@ -27,6 +27,7 @@ set -x
 "$NVCC" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/cublas_gemm.cu" -o "$OUT_DIR/cublas_gemm" "${LINK_FLAGS[@]}"
 "$NVCC" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/cuda_vector_add.cu" -o "$OUT_DIR/cuda_vector_add" "${LINK_FLAGS[@]}"
 "$NVCC" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/cuda_matrix_add.cu" -o "$OUT_DIR/cuda_matrix_add" "${LINK_FLAGS[@]}"
+"$NVCC" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/cuda_device_info.cu" -o "$OUT_DIR/cuda_device_info" -lcudart
 set +x
 
 echo "Built CUDA benchmarks under $OUT_DIR"

@@ -33,9 +33,13 @@ set -x
 "$HTCXX" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/hcblas_gemm.cu" -o "$OUT_DIR/hcblas_gemm" "${LINK_FLAGS[@]}"
 "$HTCXX" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/vector_add.cu" -o "$OUT_DIR/vector_add" "${LINK_FLAGS[@]}"
 "$HTCXX" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/matrix_add.cu" -o "$OUT_DIR/matrix_add" "${LINK_FLAGS[@]}"
+"$HTCXX" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/device_info.cu" -o "$OUT_DIR/device_info" "${LINK_FLAGS[@]}"
 set +x
 
 echo "Built hc benchmarks under $OUT_DIR"
+
+echo "Collecting device information..."
+"$OUT_DIR/device_info"
 
 FP64_CASES=(
   "256 256 4096 60"

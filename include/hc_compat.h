@@ -18,6 +18,8 @@ typedef cublasStatus_t hcblasStatus_t;
 typedef __half hcHalf_t;
 typedef cublasComputeType_t hcblasComputeType_t;
 typedef cublasMath_t hcblasMath_t;
+typedef cudaDeviceProp hcDeviceProp_t;
+typedef cudaDeviceAttr hcDeviceAttribute_t;
 
 #define hcSuccess cudaSuccess
 #define hcErrorInvalidValue cudaErrorInvalidValue
@@ -64,7 +66,26 @@ typedef cublasMath_t hcblasMath_t;
 #define hcStreamCreate cudaStreamCreate
 #define hcStreamDestroy cudaStreamDestroy
 #define hcStreamSynchronize cudaStreamSynchronize
+#define hcGetDeviceCount cudaGetDeviceCount
+#define hcGetDeviceProperties cudaGetDeviceProperties
+#define hcDeviceGetAttribute cudaDeviceGetAttribute
+#define hcDeviceGetPCIBusId cudaDeviceGetPCIBusId
+#define hcDeviceGet cudaDeviceGet
+#define hcSetDevice cudaSetDevice
+#define hcGetDevice cudaGetDevice
 #define HCBLAS_STATUS_SUCCESS CUBLAS_STATUS_SUCCESS
+
+#define hcDevAttrMultiprocessorCount cudaDevAttrMultiProcessorCount
+#define hcDevAttrMaxSharedMemoryPerMultiprocessor cudaDevAttrMaxSharedMemoryPerMultiprocessor
+#define hcDevAttrMaxSharedMemoryPerBlock cudaDevAttrMaxSharedMemoryPerBlock
+#define hcDevAttrL2CacheSize cudaDevAttrL2CacheSize
+#define hcDevAttrWarpSize cudaDevAttrWarpSize
+#define hcDevAttrClockRate cudaDevAttrClockRate
+#define hcDevAttrMemoryClockRate cudaDevAttrMemoryClockRate
+#define hcDevAttrGlobalMemoryBusWidth cudaDevAttrGlobalMemoryBusWidth
+#ifdef cudaDevAttrL1CacheSizePerMultiprocessor
+#define hcDevAttrL1CacheSizePerMultiprocessor cudaDevAttrL1CacheSizePerMultiprocessor
+#endif
 #else
 #include <hc_runtime_api.h>
 #include "hcblas/hcblas.h"
