@@ -62,4 +62,6 @@ typedef cublasComputeType_t hcblasComputeType_t;
 #else
 #include <hc_runtime_api.h>
 #include "hcblas/hcblas.h"
+
+typedef hcHalf hcHalf_t;
 #endif
