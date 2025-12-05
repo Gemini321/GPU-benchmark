@@ -53,8 +53,8 @@ typedef cublasComputeType_t hcblasComputeType_t;
 #define hcEventRecord cudaEventRecord
 #define hcEventSynchronize cudaEventSynchronize
 #define hcEventElapsedTime cudaEventElapsedTime
-#define hcHostAlloc cudaHostAlloc
-#define hcHostFree cudaFreeHost
+#define hcMallocHost cudaMallocHost
+#define hcFreeHost cudaFreeHost
 #define hcStreamCreate cudaStreamCreate
 #define hcStreamDestroy cudaStreamDestroy
 #define hcStreamSynchronize cudaStreamSynchronize

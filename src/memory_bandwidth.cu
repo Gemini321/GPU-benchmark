@@ -87,8 +87,8 @@ int main(int argc, char **argv) {
     double *d_src = nullptr;
     double *d_dst = nullptr;
 
-    HC_CHECK(hcHostAlloc(&h_src, max_size, 0));
-    HC_CHECK(hcHostAlloc(&h_dst, max_size, 0));
+    HC_CHECK(hcMallocHost(&h_src, max_size, 0));
+    HC_CHECK(hcMallocHost(&h_dst, max_size, 0));
     std::memset(h_src, 0xAB, max_size);
     std::memset(h_dst, 0, max_size);
 
@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
 
     HC_CHECK(hcFree(d_src));
     HC_CHECK(hcFree(d_dst));
-    HC_CHECK(hcHostFree(h_src));
-    HC_CHECK(hcHostFree(h_dst));
+    HC_CHECK(hcFreeHost(h_src));
+    HC_CHECK(hcFreeHost(h_dst));
     return 0;
 }

@@ -20,7 +20,7 @@ COMMON_FLAGS=(
 )
 
 LINK_FLAGS=(
-  -L"$HT_LIB_DIR" -lhc_runtime -lhcblas
+  -L"$HT_LIB_DIR" -lhcruntime -lhcblas
 )
 
 set -x
