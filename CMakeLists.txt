@@ -67,6 +67,12 @@ if(BUILD_HC_BENCHES)
 
     add_executable(hcblas_gemm src/hcblas_gemm.cu)
     target_link_libraries(hcblas_gemm PRIVATE benchmark_common ${_runtime_lib} ${_blas_lib})
+
+    add_executable(vector_add src/vector_add.cu)
+    target_link_libraries(vector_add PRIVATE benchmark_common ${_runtime_lib})
+
+    add_executable(matrix_add src/matrix_add.cu)
+    target_link_libraries(matrix_add PRIVATE benchmark_common ${_runtime_lib})
 endif()
 
 if(BUILD_NVIDIA_BENCHES)
@@ -81,4 +87,12 @@ if(BUILD_NVIDIA_BENCHES)
     add_executable(cublas_gemm src/cublas_gemm.cu)
     target_include_directories(cublas_gemm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
     target_link_libraries(cublas_gemm PRIVATE CUDA::cudart CUDA::cublas)
+
+    add_executable(cuda_vector_add src/cuda_vector_add.cu)
+    target_include_directories(cuda_vector_add PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_link_libraries(cuda_vector_add PRIVATE CUDA::cudart CUDA::cublas)
+
+    add_executable(cuda_matrix_add src/cuda_matrix_add.cu)
+    target_include_directories(cuda_matrix_add PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_link_libraries(cuda_matrix_add PRIVATE CUDA::cudart CUDA::cublas)
 endif()

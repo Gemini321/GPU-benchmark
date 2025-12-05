@@ -17,13 +17,16 @@ FP64_CASES = [
 
 BANDWIDTH_SIZES = [
     1 << 20,
+    2 << 20,
     4 << 20,
+    8 << 20,
     16 << 20,
+    32 << 20,
     64 << 20,
+    128 << 20,
     256 << 20,
     512 << 20,
     1024 << 20,
-    1536 << 20,
 ]
 
 GEMM_SHAPES = [
@@ -37,7 +40,13 @@ GEMM_SHAPES = [
     "16384x16384x16384",
 ]
 
-GEMM_DTYPES = ["double", "float", "float16"]
+GEMM_DTYPES = ["double", "float", "float16", "tf32"]
+
+VECTOR_SIZES = [1 << 20, 1 << 22, 1 << 24, 1 << 26]
+VECTOR_DTYPES = ["float", "double"]
+
+MATRIX_SHAPES = ["2048x2048", "4096x4096", "4096x8192", "8192x8192"]
+MATRIX_DTYPES = ["float", "double"]
 
 
 def run_cmd(cmd, cwd=REPO_ROOT):
@@ -101,6 +110,26 @@ def run_gemm(platform: str):
     run_cmd(cmd)
 
 
+def run_vector_add(platform: str):
+    binary = BIN_DIR / ("cuda_vector_add" if platform == "cuda" else "vector_add")
+    cmd = [str(binary), "--repeats", "80"]
+    for dtype in VECTOR_DTYPES:
+        cmd.extend(["--dtype", dtype])
+    for size in VECTOR_SIZES:
+        cmd.extend(["--size", str(size)])
+    run_cmd(cmd)
+
+
+def run_matrix_add(platform: str):
+    binary = BIN_DIR / ("cuda_matrix_add" if platform == "cuda" else "matrix_add")
+    cmd = [str(binary), "--repeats", "40"]
+    for dtype in MATRIX_DTYPES:
+        cmd.extend(["--dtype", dtype])
+    for shape in MATRIX_SHAPES:
+        cmd.extend(["--shape", shape])
+    run_cmd(cmd)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build and run MXGPU benchmarks")
     parser.add_argument("--skip-build", action="store_true", help="Assume binaries already built")
@@ -122,10 +151,14 @@ def main():
         run_fp64("hc")
         run_bandwidth("hc")
         run_gemm("hc")
+        run_vector_add("hc")
+        run_matrix_add("hc")
     if args.platform in ("cuda", "both"):
         run_fp64("cuda")
         run_bandwidth("cuda")
         run_gemm("cuda")
+        run_vector_add("cuda")
+        run_matrix_add("cuda")
 
 
 if __name__ == "__main__":

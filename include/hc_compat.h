@@ -17,6 +17,7 @@ typedef cublasHandle_t hcblasHandle_t;
 typedef cublasStatus_t hcblasStatus_t;
 typedef __half hcHalf_t;
 typedef cublasComputeType_t hcblasComputeType_t;
+typedef cublasMath_t hcblasMath_t;
 
 #define hcSuccess cudaSuccess
 #define hcErrorInvalidValue cudaErrorInvalidValue
@@ -24,6 +25,7 @@ typedef cublasComputeType_t hcblasComputeType_t;
 #define hcblasCreate cublasCreate
 #define hcblasDestroy cublasDestroy
 #define hcblasSetStream cublasSetStream
+#define hcblasSetMathMode cublasSetMathMode
 #define hcblasDgemm cublasDgemm
 #define hcblasSgemm cublasSgemm
 #define hcblasGemmEx cublasGemmEx
@@ -31,7 +33,11 @@ typedef cublasComputeType_t hcblasComputeType_t;
 #define HCBLAS_OP_N CUBLAS_OP_N
 #define HCBLAS_OP_T CUBLAS_OP_T
 #define HCBLAS_COMPUTE_32F CUBLAS_COMPUTE_32F
+#define HCBLAS_COMPUTE_32F_FAST_TF32 CUBLAS_COMPUTE_32F_FAST_TF32
 #define HCBLAS_GEMM_DEFAULT CUBLAS_GEMM_DEFAULT
+#define HCBLAS_GEMM_DEFAULT_TENSOR_OP CUBLAS_GEMM_DEFAULT_TENSOR_OP
+#define HCBLAS_DEFAULT_MATH CUBLAS_DEFAULT_MATH
+#define HCBLAS_TF32_TENSOR_OP_MATH CUBLAS_TF32_TENSOR_OP_MATH
 
 #define HPCC_R_16F CUDA_R_16F
 #define HPCC_R_32F CUDA_R_32F

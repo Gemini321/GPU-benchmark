@@ -1,5 +1,0 @@
-/root/GPU-benchmark/build/CMakeFiles/fp64_flops.dir
-/root/GPU-benchmark/build/CMakeFiles/memory_bandwidth.dir
-/root/GPU-benchmark/build/CMakeFiles/hcblas_gemm.dir
-/root/GPU-benchmark/build/CMakeFiles/edit_cache.dir
-/root/GPU-benchmark/build/CMakeFiles/rebuild_cache.dir

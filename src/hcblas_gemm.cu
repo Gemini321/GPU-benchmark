@@ -14,7 +14,7 @@ struct GemmShape {
     size_t k;
 };
 
-enum class GemmDType { Float32, Float64, Float16 };
+enum class GemmDType { Float32, Float64, Float16, TF32 };
 
 struct GemmConfig {
     std::vector<GemmShape> shapes;
@@ -56,7 +56,10 @@ GemmDType parse_dtype(const std::string &token) {
     if (lowered == "float16" || lowered == "fp16" || lowered == "half") {
         return GemmDType::Float16;
     }
-    fprintf(stderr, "Unknown dtype '%s' (expected float/fp32, double/fp64, or float16/fp16)\n", token.c_str());
+    if (lowered == "tf32" || lowered == "tensorfloat32" || lowered == "tensor32") {
+        return GemmDType::TF32;
+    }
+    fprintf(stderr, "Unknown dtype '%s' (expected float/fp32, double/fp64, float16/fp16, or tf32)\n", token.c_str());
     std::exit(1);
 }
 
@@ -80,7 +83,7 @@ GemmConfig parse_args(int argc, char **argv) {
                       GemmShape{12288, 12288, 12288}, GemmShape{16384, 16384, 16384}};
     }
     if (cfg.dtypes.empty()) {
-        cfg.dtypes = {GemmDType::Float64, GemmDType::Float32, GemmDType::Float16};
+        cfg.dtypes = {GemmDType::Float64, GemmDType::Float32, GemmDType::Float16, GemmDType::TF32};
     }
     return cfg;
 }
@@ -205,6 +208,75 @@ void run_dtype(const GemmConfig &cfg, hcblasHandle_t handle, hcStream_t stream) 
     }
 }
 
+void run_tf32(const GemmConfig &cfg, hcblasHandle_t handle, hcStream_t stream) {
+    HCBLAS_CHECK(hcblasSetMathMode(handle, HCBLAS_TF32_TENSOR_OP_MATH));
+    for (const auto &shape : cfg.shapes) {
+        const size_t a_elems = shape.m * shape.k;
+        const size_t b_elems = shape.k * shape.n;
+        const size_t c_elems = shape.m * shape.n;
+
+        float *d_A = nullptr;
+        float *d_B = nullptr;
+        float *d_C = nullptr;
+        HC_CHECK(hcMalloc(reinterpret_cast<void **>(&d_A), a_elems * sizeof(float)));
+        HC_CHECK(hcMalloc(reinterpret_cast<void **>(&d_B), b_elems * sizeof(float)));
+        HC_CHECK(hcMalloc(reinterpret_cast<void **>(&d_C), c_elems * sizeof(float)));
+
+        std::vector<float> h_A(a_elems);
+        std::vector<float> h_B(b_elems);
+        init_host(h_A);
+        init_host(h_B);
+        HC_CHECK(hcMemcpy(d_A, h_A.data(), h_A.size() * sizeof(float), hcMemcpyHostToDevice));
+        HC_CHECK(hcMemcpy(d_B, h_B.data(), h_B.size() * sizeof(float), hcMemcpyHostToDevice));
+        HC_CHECK(hcMemset(d_C, 0, c_elems * sizeof(float)));
+
+        const float alpha = 1.0f;
+        const float beta = 0.0f;
+        HCBLAS_CHECK(hcblasGemmEx(handle, HCBLAS_OP_N, HCBLAS_OP_N, static_cast<int>(shape.m), static_cast<int>(shape.n),
+                                  static_cast<int>(shape.k), &alpha, d_A, HPCC_R_32F, static_cast<int>(shape.m), d_B,
+                                  HPCC_R_32F, static_cast<int>(shape.k), &beta, d_C, HPCC_R_32F, static_cast<int>(shape.m),
+                                  HCBLAS_COMPUTE_32F_FAST_TF32, HCBLAS_GEMM_DEFAULT_TENSOR_OP));
+        HC_CHECK(hcStreamSynchronize(stream));
+
+        hcEvent_t start, stop;
+        HC_CHECK(hcEventCreate(&start));
+        HC_CHECK(hcEventCreate(&stop));
+        HC_CHECK(hcEventRecord(start, stream));
+        for (int i = 0; i < cfg.repeats; ++i) {
+            HCBLAS_CHECK(hcblasGemmEx(handle, HCBLAS_OP_N, HCBLAS_OP_N, static_cast<int>(shape.m),
+                                      static_cast<int>(shape.n), static_cast<int>(shape.k), &alpha, d_A, HPCC_R_32F,
+                                      static_cast<int>(shape.m), d_B, HPCC_R_32F, static_cast<int>(shape.k), &beta, d_C,
+                                      HPCC_R_32F, static_cast<int>(shape.m), HCBLAS_COMPUTE_32F_FAST_TF32,
+                                      HCBLAS_GEMM_DEFAULT_TENSOR_OP));
+        }
+        HC_CHECK(hcEventRecord(stop, stream));
+        HC_CHECK(hcEventSynchronize(stop));
+
+        float ms = 0.0f;
+        HC_CHECK(hcEventElapsedTime(&ms, start, stop));
+        HC_CHECK(hcEventDestroy(start));
+        HC_CHECK(hcEventDestroy(stop));
+
+        const double seconds = ms / 1e3;
+        const double ops = 2.0 * static_cast<double>(shape.m) * static_cast<double>(shape.n) *
+                           static_cast<double>(shape.k) * static_cast<double>(cfg.repeats);
+        const double gflops = (ops / seconds) / 1e9;
+
+        char shape_buf[64];
+        std::snprintf(shape_buf, sizeof(shape_buf), "%zux%zux%zu", shape.m, shape.n, shape.k);
+        char time_buf[32];
+        char flops_buf[32];
+        std::snprintf(time_buf, sizeof(time_buf), "%.2f", ms / cfg.repeats);
+        std::snprintf(flops_buf, sizeof(flops_buf), "%.1f", gflops);
+        print_table_row({shape_buf, time_buf, flops_buf});
+
+        HC_CHECK(hcFree(d_A));
+        HC_CHECK(hcFree(d_B));
+        HC_CHECK(hcFree(d_C));
+    }
+    HCBLAS_CHECK(hcblasSetMathMode(handle, HCBLAS_DEFAULT_MATH));
+}
+
 int main(int argc, char **argv) {
     GemmConfig cfg = parse_args(argc, argv);
 
@@ -213,6 +285,7 @@ int main(int argc, char **argv) {
     hcStream_t stream;
     HC_CHECK(hcStreamCreate(&stream));
     HCBLAS_CHECK(hcblasSetStream(handle, stream));
+    HCBLAS_CHECK(hcblasSetMathMode(handle, HCBLAS_DEFAULT_MATH));
 
     for (const auto dtype : cfg.dtypes) {
         if (dtype == GemmDType::Float32) {
@@ -223,10 +296,14 @@ int main(int argc, char **argv) {
             printf("hcBLAS FP64 GEMM results\n");
             print_table_header({"MxNxK", "Time (ms)", "GFLOP/s"});
             run_dtype<double>(cfg, handle, stream);
-        } else {
+        } else if (dtype == GemmDType::Float16) {
             printf("hcBLAS FP16 GEMM results\n");
             print_table_header({"MxNxK", "Time (ms)", "GFLOP/s"});
             run_dtype<hcHalf_t>(cfg, handle, stream);
+        } else {
+            printf("hcBLAS TF32 GEMM results (Tensor Core)\n");
+            print_table_header({"MxNxK", "Time (ms)", "GFLOP/s"});
+            run_tf32(cfg, handle, stream);
         }
     }
 

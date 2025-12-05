@@ -27,6 +27,8 @@ set -x
 "$HTCXX" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/fp64_flops.cu" -o "$OUT_DIR/fp64_flops" "${LINK_FLAGS[@]}"
 "$HTCXX" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/memory_bandwidth.cu" -o "$OUT_DIR/memory_bandwidth" "${LINK_FLAGS[@]}"
 "$HTCXX" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/hcblas_gemm.cu" -o "$OUT_DIR/hcblas_gemm" "${LINK_FLAGS[@]}"
+"$HTCXX" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/vector_add.cu" -o "$OUT_DIR/vector_add" "${LINK_FLAGS[@]}"
+"$HTCXX" "${COMMON_FLAGS[@]}" "$ROOT_DIR/src/matrix_add.cu" -o "$OUT_DIR/matrix_add" "${LINK_FLAGS[@]}"
 set +x
 
 echo "Built hc benchmarks under $OUT_DIR"
