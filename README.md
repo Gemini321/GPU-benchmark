@@ -12,6 +12,27 @@ Toolkit for evaluating MXGPU/hc devices with three micro-benchmarks: raw FP64 th
 
 ## Building
 
+### 使用 shell 脚本（无需 CMake）
+
+沐曦 GPU：
+
+```bash
+cd /root/GPU-benchmark
+HTCXX=/opt/hc/bin/htcc HT_INCLUDE_DIR=/opt/hc/include HT_LIB_DIR=/opt/hc/lib \
+    ./scripts/build_hc.sh
+./scripts/run_suite.sh hc   # 可选，运行默认 FP64/BW/GEMM
+```
+
+NVIDIA / CUDA：
+
+```bash
+cd /root/GPU-benchmark
+CUDA_HOME=/usr/local/cuda ./scripts/build_cuda.sh
+./scripts/run_suite.sh cuda
+```
+
+### 使用 CMake
+
 ```bash
 cd /root/GPU-benchmark
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
